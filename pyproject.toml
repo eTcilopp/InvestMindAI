@@ -1,0 +1,35 @@
+[tool.poetry]
+name = "django-email-auth"
+version = "0.1.0"
+description = "Django project with email authentication"
+authors = ["Your Name <your.email@example.com>"]
+package-mode = false
+readme = "README.md"
+
+[tool.poetry.dependencies]
+python = "^3.11"
+django = "^5.0.0"
+django-environ = "^0.11.0"
+dj-database-url = "^1.0"
+pillow = "^10.0.0"
+whitenoise = "^6.6.0"
+gunicorn = "^21.2.0"
+psycopg2-binary = "^2.9.0"
+
+[tool.poetry.group.dev.dependencies]
+black = "^23.0.0"
+flake8 = "^6.0.0"
+pytest-django = "^4.7.0"
+django-debug-toolbar = "^4.2.0"
+
+[build-system]
+requires = ["poetry-core"]
+build-backend = "poetry.core.masonry.api"
+
+[tool.black]
+line-length = 88
+target-version = ['py311']
+
+[tool.pytest.ini_options]
+DJANGO_SETTINGS_MODULE = "config.settings"
+python_files = ["tests.py", "test_*.py", "*_tests.py"]

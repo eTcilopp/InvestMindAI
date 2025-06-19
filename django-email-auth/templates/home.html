@@ -1,0 +1,27 @@
+{% extends 'base.html' %}
+
+{% block title %}Главная - Django Email Auth{% endblock %}
+
+{% block content %}
+<div class="row justify-content-center">
+    <div class="col-md-8">
+        <div class="jumbotron bg-light p-5 rounded">
+            <h1 class="display-4">Добро пожаловать!</h1>
+            <p class="lead">Это Django проект с регистрацией по email.</p>
+            
+            {% if user.is_authenticated %}
+                <p>Вы успешно вошли в систему как <strong>{{ user.email }}</strong></p>
+                {% if user.is_email_verified %}
+                    <span class="badge bg-success">Email подтвержден</span>
+                {% else %}
+                    <span class="badge bg-warning">Email не подтвержден</span>
+                {% endif %}
+            {% else %}
+                <p>Пожалуйста, войдите в систему или зарегистрируйтесь.</p>
+                <a class="btn btn-primary btn-lg me-2" href="{% url 'login' %}">Войти</a>
+                <a class="btn btn-success btn-lg" href="{% url 'signup' %}">Регистрация</a>
+            {% endif %}
+        </div>
+    </div>
+</div>
+{% endblock %}
