@@ -100,7 +100,7 @@ python manage.py runserver
 ## Структура проекта
 
 ```
-django-email-auth/
+django_email_auth/
 ├── config/              # Настройки Django
 │   ├── __init__.py
 │   ├── settings.py

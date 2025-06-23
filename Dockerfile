@@ -30,8 +30,8 @@ RUN poetry install --only main --no-root
 RUN mkdir -p staticfiles media
 
 # Установка переменных окружения
-ENV PYTHONPATH=/app/django-email-auth
-ENV DJANGO_SETTINGS_MODULE=config.settings
+ENV PYTHONPATH=/app/django_email_auth
+ENV DJANGO_SETTINGS_MODULE=django_email_auth.config.settings
 
 # Установка прав доступа
 RUN chown -R app:app /app
@@ -44,4 +44,4 @@ RUN python manage.py collectstatic --noinput
 EXPOSE 8000
 
 # Команда запуска
-CMD ["gunicorn", "--bind", "0.0.0.0:8000", "config.wsgi:application"]
+CMD ["python", "manage.py", "runserver", "gunicorn", "--bind", "0.0.0.0:8000", "django_email_auth.config.wsgi:application"]
