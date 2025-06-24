@@ -1,25 +1,35 @@
-[project]
-name = "investmindai"
+[tool.poetry]
+name = "django_email_auth"
 version = "0.1.0"
-description = ""
-authors = [
-    {name = "CodeMonkeysGroup"}
-]
-readme = "README.md"
+description = "Django project with email authentication"
+authors = ["Your Name <your.email@example.com>"]
 package-mode = false
-requires-python = ">=3.10"
+readme = "README.md"
 
-dependencies = [
-    "pandas (>=2.3.0,<3.0.0)",
-    "numpy",
-    "matplotlib (>=3.10.3,<4.0.0)",
-    "plotly (>=6.1.2,<7.0.0)",
-    "seaborn (>=0.13.2,<0.14.0)",
-    "yfinance (>=0.2.63,<0.3.0)",
-    "ipykernel (>=6.29.5,<7.0.0)"
-]
+[tool.poetry.dependencies]
+python = "^3.11"
+django = "^5.0.0"
+django-environ = "^0.11.0"
+dj-database-url = "^2.1.0"
+pillow = "^10.0.0"
+whitenoise = "^6.6.0"
+gunicorn = "^21.2.0"
+psycopg2-binary = "^2.9.0"
 
+[tool.poetry.group.dev.dependencies]
+black = "^23.0.0"
+flake8 = "^6.0.0"
+pytest-django = "^4.7.0"
+django-debug-toolbar = "^4.2.0"
 
 [build-system]
-requires = ["poetry-core>=2.0.0,<3.0.0"]
+requires = ["poetry-core"]
 build-backend = "poetry.core.masonry.api"
+
+[tool.black]
+line-length = 88
+target-version = ['py311']
+
+[tool.pytest.ini_options]
+DJANGO_SETTINGS_MODULE = "config.settings"
+python_files = ["tests.py", "test_*.py", "*_tests.py"]
