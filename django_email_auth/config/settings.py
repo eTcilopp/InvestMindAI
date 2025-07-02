@@ -1,6 +1,7 @@
 import os
 from pathlib import Path
 import environ
+import dj_database_url  # Сторонний импорт вынесен наверх
 
 
 # Build paths inside the project like this: BASE_DIR / 'subdir'.
@@ -12,30 +13,20 @@ env = environ.Env(
     DEBUG=(bool, False)
 )
 
-STATICFILES_DIRS = [
-    BASE_DIR / 'static',
-]
-
 # Take environment variables from .env file
 environ.Env.read_env(os.path.join(BASE_DIR, '.env'))
 
-# Email
-EMAIL_BACKEND     = env('EMAIL_BACKEND', default='django.core.mail.backends.console.EmailBackend')
-EMAIL_HOST        = env('EMAIL_HOST',    default='localhost')
-EMAIL_PORT        = env.int('EMAIL_PORT',      default=25)
-EMAIL_USE_TLS     = env.bool('EMAIL_USE_TLS',   default=False)
-EMAIL_HOST_USER   = env('EMAIL_HOST_USER', default='')
-EMAIL_HOST_PASSWORD = env('EMAIL_HOST_PASSWORD', default='')
-DEFAULT_FROM_EMAIL = env('DEFAULT_FROM_EMAIL', default='webmaster@localhost')
+#print("SECRET_KEY from .env:", env("SECRET_KEY", default="NOT FOUND"))
 
 # SECURITY WARNING: keep the secret key used in production secret!
-SECRET_KEY = env('SECRET_KEY', default='django-insecure-change-me-in-production')
+SECRET_KEY = env('SECRET_KEY', default='django-insecure-temporary-key-for-development-only-change-in-production') 
+SUPABASE_DB_PASSWORD = env('SUPABASE_DB_PASSWORD')
 
 # SECURITY WARNING: don't run with debug turned on in production!
 DEBUG = env('DEBUG')
 
-#ALLOWED_HOSTS = env.list('ALLOWED_HOSTS', default=['localhost', '127.0.0.1', "192.168.186.89"])
-ALLOWED_HOSTS = ["*"]
+#ALLOWED_HOSTS = env.list('ALLOWED_HOSTS', default=['localhost', '127.0.0.1'])
+ALLOWED_HOSTS = env.list('ALLOWED_HOSTS', default=['localhost', '127.0.0.1', '0.0.0.0'])  
 
 # Application definition
 INSTALLED_APPS = [
@@ -46,8 +37,9 @@ INSTALLED_APPS = [
     'django.contrib.messages',
     'django.contrib.staticfiles',
     'django.contrib.sites',
-        
+    
     # Local apps
+    'accounts',
     'django_email_auth.accounts',
 ]
 
@@ -62,7 +54,7 @@ MIDDLEWARE = [
     'django.middleware.clickjacking.XFrameOptionsMiddleware',
 ]
 
-ROOT_URLCONF = 'django_email_auth.config.urls'
+ROOT_URLCONF = 'config.urls'
 
 TEMPLATES = [
     {
@@ -80,25 +72,33 @@ TEMPLATES = [
     },
 ]
 
-WSGI_APPLICATION = 'django_email_auth.config.wsgi.application'
+WSGI_APPLICATION = 'config.wsgi.application'
 
-# Database
-DATABASES = {
-    'default': {
-        'ENGINE': 'django.db.backends.postgresql',
-        'NAME': env('DB_NAME', default='django_db'),
-        'USER': env('DB_USER', default='django_user'),
-        'PASSWORD': env('DB_PASSWORD', default='django_password'),
-        'HOST': env('DB_HOST', default='localhost'),
-        'PORT': env('DB_PORT', default='5432'),
-    }
-}
-
-
-# Если используется DATABASE_URL (например, на Heroku)
-import dj_database_url
+# Supabase Database Configuration
+# Приоритет: если есть DATABASE_URL, используем его, иначе отдельные параметры
 if env('DATABASE_URL', default=None):
-    DATABASES['default'] = dj_database_url.parse(env('DATABASE_URL'))
+    DATABASES = {
+        'default': dj_database_url.parse(
+            env('DATABASE_URL'),
+            conn_max_age=600,
+            conn_health_checks=True,
+        )
+    }
+else:
+    # Fallback к отдельным параметрам Supabase
+    DATABASES = {
+        'default': {
+            'ENGINE': 'django.db.backends.postgresql',
+            'NAME': env('SUPABASE_DB_NAME', default='postgres'),
+            'USER': env('SUPABASE_DB_USER', default='postgres'),
+            'PASSWORD': env('SUPABASE_DB_PASSWORD'),
+            'HOST': env('SUPABASE_DB_HOST'),
+            'PORT': env('SUPABASE_DB_PORT', default='6543'),
+            'OPTIONS': {
+                'sslmode': 'require',
+            },
+        }
+    }
 
 # Password validation
 AUTH_PASSWORD_VALIDATORS = [
@@ -116,7 +116,6 @@ AUTH_PASSWORD_VALIDATORS = [
     },
 ]
 
-
 # Internationalization
 LANGUAGE_CODE = 'ru-ru'
 TIME_ZONE = 'UTC'
@@ -128,7 +127,7 @@ STATIC_URL = '/static/'
 STATIC_ROOT = BASE_DIR / 'staticfiles'
 STATICFILES_DIRS = [
     BASE_DIR / 'static',
-]
+    ] if (BASE_DIR / 'static').exists() else []
 
 # Media files
 MEDIA_URL = '/media/'
@@ -139,6 +138,15 @@ DEFAULT_AUTO_FIELD = 'django.db.models.BigAutoField'
 
 # Sites framework
 SITE_ID = 1
+
+# Email settings
+EMAIL_BACKEND = env('EMAIL_BACKEND', default='django.core.mail.backends.console.EmailBackend')
+EMAIL_HOST = env('EMAIL_HOST', default='localhost')
+EMAIL_PORT = env('EMAIL_PORT', default=587)
+EMAIL_USE_TLS = env('EMAIL_USE_TLS', default=True)
+EMAIL_HOST_USER = env('EMAIL_HOST_USER', default='')
+EMAIL_HOST_PASSWORD = env('EMAIL_HOST_PASSWORD', default='')
+DEFAULT_FROM_EMAIL = env('DEFAULT_FROM_EMAIL', default='noreply@example.com')
 
 # Custom user model
 AUTH_USER_MODEL = 'accounts.User'
@@ -159,3 +167,4 @@ if not DEBUG:
     SESSION_COOKIE_SECURE = True
     CSRF_COOKIE_SECURE = True
     X_FRAME_OPTIONS = 'DENY'
+    
